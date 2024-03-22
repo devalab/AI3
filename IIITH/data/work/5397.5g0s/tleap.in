@@ -1,0 +1,30 @@
+source /home/sanjana/miniconda3/dat/leap/cmd/leaprc.protein.ff14SB 
+source /home/sanjana/miniconda3/dat/leap/cmd/leaprc.gaff2 
+source /home/sanjana/miniconda3/dat/leap/cmd/leaprc.water.tip3p 
+ 
+ 
+# loading parameters for ligand 
+ 
+loadamberprep ligand_clean_h.prepi 
+loadamberparams ligand.frcmod 
+ 
+ligand = loadmol2 ligand_clean_h.mol2 
+# loading parameters for cofactor 
+ 
+loadamberprep cofactor_0.prepi 
+loadamberparams cofactor_0.frcmod 
+cofactor_0 = loadmol2 cofactor_0.mol2 
+ 
+water_B = loadpdb water_B.pdb 
+receptor_B = loadpdb protein_noh_chain_B.pdb 
+# Protein doesn't have disulphate bonds 
+
+ 
+complex = combine { receptor_B N cofactor_0 ligand water_B } 
+savepdb complex 5397_5g0s.pdb 
+solvatebox complex TIP3PBOX 10 
+addions complex Cl- 0 
+addions complex Na+ 0 
+savepdb complex complex_solvated.pdb 
+saveamberparm complex complex_solvated.prmtop complex_solvated.inpcrd 
+quit 

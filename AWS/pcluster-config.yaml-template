@@ -1,0 +1,137 @@
+Region: "${AWS_REGION}"
+Image:
+  CustomAmi: "${AMI_ID}"
+  Os: alinux2
+SharedStorage:
+  - MountDir: /shared
+    Name: default-ebs
+    StorageType: Ebs
+  - Name: parallel-fs
+    StorageType: FsxLustre
+    MountDir: /fsx
+    FsxLustreSettings:
+      StorageCapacity: 7200
+      DeploymentType: PERSISTENT_2
+      PerUnitStorageThroughput: 250
+HeadNode:
+  InstanceType: c5.12xlarge
+  Networking:
+    SubnetId: "${SUBNET_ID_HEADNODE}"
+    ElasticIp: true
+  Ssh:
+    KeyName: "${KEY_NAME}"
+  LocalStorage:
+    RootVolume:
+      Size: 80
+  Dcv:
+    Enabled: true
+    Port: 8443
+  Iam:
+    AdditionalIamPolicies:
+      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+Scheduling:
+  Scheduler: slurm
+  SlurmSettings:
+    QueueUpdateStrategy: DRAIN
+  SlurmQueues:
+    - Name: c5-od-queue
+      ComputeResources:
+        - Name: c5
+          InstanceType: c5.12xlarge
+          MinCount: 0
+          MaxCount: 500
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: false
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - "${SUGNET_ID_ONDEMAND}"
+        PlacementGroup:
+          Enabled: false
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 80
+    - Name: spot-queue-small
+      ComputeResources:
+        - Name: c5-c6i-small
+          Instances:
+            - InstanceType: c5.4xlarge
+            - InstanceType: c6i.4xlarge
+          MinCount: 0
+          MaxCount: 10000
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: false
+      CapacityType: SPOT
+      AllocationStrategy: lowest-price
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - "${SUBNET_ID_SPOT_1}"
+        PlacementGroup:
+          Enabled: false
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 80
+    - Name: spot-queue-medium
+      ComputeResources:
+        - Name: c5-c6i-medium
+          Instances:
+            - InstanceType: c5.12xlarge
+            - InstanceType: c6i.12xlarge
+          MinCount: 0
+          MaxCount: 10000
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: false
+      CapacityType: SPOT
+      AllocationStrategy: lowest-price
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - "${SUBNET_ID_SPOT_2}"
+        PlacementGroup:
+          Enabled: false
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 80
+    - Name: spot-queue-large
+      ComputeResources:
+        - Name: c5-c6i-large
+        Instances:
+          - InstanceType: c5.24xlarge
+          - InstanceType: c6i.24xlarge
+        MinCount: 0
+        MaxCount: 20000
+        DisableSimultaneousMultithreading: true
+        Efa:
+          Enabled: false
+      CapacityType: SPOT
+      AllocationStrategy: lowest-price
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - "${SUBNET_ID_SPOT_3}"
+        PlacementGroup:
+          Enabled: false
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 80

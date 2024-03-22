@@ -1,0 +1,3 @@
+[submodule "InsilicoMedicine"]
+	path = InsilicoMedicine
+	url = git@github.com:insilicomedicine/ABFE.git
